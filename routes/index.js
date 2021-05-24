@@ -1,6 +1,7 @@
 var express = require('express')
 var router = express.Router()
 const request = require('request')
+const passport = require('passport')
 
 const apiKey = '1fb720b97cc13e580c2c35e1138f90f8'
 
@@ -15,14 +16,11 @@ router.use((req, res, next) => {
 })
 
 /* GET home page. */
-router.get('/', function (req, res, next) {
+router.get('/', (req, res, next) => {
+  console.log('User info please!!!!!!!!!!')
+
+  console.log(req.user)
   request.get(nowPlayingUrl, (error, response, movieData) => {
-    // console.log('==============The Error==============')
-    // console.log(error)
-
-    // console.log('============== The Resonse ==============')
-    // console.log(response)
-
     const parsedData = JSON.parse(movieData)
 
     // res.json(parsedData)
@@ -31,6 +29,16 @@ router.get('/', function (req, res, next) {
     })
   })
 })
+
+router.get('/login', passport.authenticate('github'))
+
+router.get(
+  '/auth',
+  passport.authenticate('github', {
+    failureRedirect: '/login',
+    successRedirect: '/',
+  })
+)
 
 router.get('/movies/:id', (req, res, next) => {
   const movieId = req.params.id

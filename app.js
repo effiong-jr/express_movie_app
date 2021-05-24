@@ -5,6 +5,12 @@ var cookieParser = require('cookie-parser')
 var logger = require('morgan')
 const helmet = require('helmet')
 
+//=================== Passport ================
+const session = require('express-session')
+const passport = require('passport')
+const GitHubStrategy = require('passport-github2').Strategy
+//======================================
+
 var indexRouter = require('./routes/index')
 
 var app = express()
@@ -14,6 +20,42 @@ app.use(
     contentSecurityPolicy: false,
   })
 )
+
+// ======================= configure passport =======================
+
+app.use(
+  session({
+    secret: 'mastering express',
+    resave: false,
+    saveUninitialized: true,
+  })
+)
+
+app.use(passport.initialize())
+app.use(passport.session())
+
+const passportConfig = require('./config')
+
+passport.use(
+  new GitHubStrategy(passportConfig, function (
+    accessToken,
+    refreshToken,
+    profile,
+    done
+  ) {
+    done(null, profile)
+  })
+)
+
+passport.serializeUser((user, done) => {
+  done(null, user)
+})
+
+passport.deserializeUser((user, done) => {
+  done(null, user)
+})
+
+// ===============================
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
